@@ -8,7 +8,6 @@ fn main() {
     println!("MFT index data size : {}", &gw2dat.mft_index_data.len());
 
     let data = gw2dat
-        .get_mft_data("Local.dat", ArchiveId::FileId, 16)
+        .get_mft_data("Local.dat", ArchiveId::BaseId, 16)
         .unwrap();
-    println!("Hi");
 }

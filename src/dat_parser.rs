@@ -260,6 +260,10 @@ impl DatFile {
                 panic!("Decompression failed.");
             }
 
+            if custom_output_buffer_size > 0 {
+                output_buffer_size = custom_output_buffer_size;
+            }
+
             // Convert the result pointer to a slice
             let output_slice =
                 unsafe { std::slice::from_raw_parts(result_ptr, output_buffer_size as usize) };
@@ -293,7 +297,7 @@ impl DatFile {
         // Print in ASCII
         println!("ASCII: ");
         for i in 0..length {
-            if data[i].is_ascii() {
+            if data[i] > 31 && data[i] < 127 {
                 print!("{}", data[i] as char);
             } else {
                 print!(".");
