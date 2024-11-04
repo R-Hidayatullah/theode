@@ -7,6 +7,16 @@ use std::{
 use byteorder::{LittleEndian, ReadBytesExt};
 use serde::{Deserialize, Serialize};
 
+#[link(name = "dat_decompress")] // Ensure this links to the correct C library
+extern "C" {
+    pub fn inflate_buffer(
+        input_buffer_size: u32,         // Corresponds to uint32_t input_buffer_size
+        input_buffer: *const u8,        // Corresponds to uint32_t *input_buffer
+        output_buffer_size: *mut u32,   // Corresponds to uint32_t *output_buffer_size
+        custom_output_buffer_size: u32, // Corresponds to uint32_t custom_output_buffer_size
+    ) -> *mut u8; // Corresponds to uint8_t *
+}
+
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct DatHeader {
     version: u8,
@@ -226,7 +236,40 @@ impl DatFile {
 
         // Call mft_read_data to read the compressed data
         let data = Self::mft_read_data(&mut buf_reader, mft_table.offset, mft_table.size);
-        Ok(data)
+
+        DatFile::print_first_16_bytes(&data);
+
+        if mft_table.compression_flag != 0 {
+            println!("Compressed!");
+            let input_buffer_size: u32 = data.len() as u32;
+            let mut output_buffer_size: u32 = data.len() as u32;
+            let custom_output_buffer_size: u32 = 0;
+
+            // Call the external C function
+            let result_ptr = unsafe {
+                inflate_buffer(
+                    input_buffer_size,
+                    data.as_ptr(),
+                    &mut output_buffer_size,
+                    custom_output_buffer_size,
+                )
+            };
+
+            // Check if the result pointer is null, indicating failure
+            if result_ptr.is_null() {
+                panic!("Decompression failed.");
+            }
+
+            // Convert the result pointer to a slice
+            let output_slice =
+                unsafe { std::slice::from_raw_parts(result_ptr, output_buffer_size as usize) };
+            DatFile::print_first_16_bytes(&output_slice);
+            Ok(output_slice.to_vec())
+        } else {
+            DatFile::print_first_16_bytes(&data);
+
+            Ok(data)
+        }
     }
 
     fn mft_read_data(file: &mut BufReader<File>, offset: u64, length: u32) -> Vec<u8> {
