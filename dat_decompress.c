@@ -33,7 +33,7 @@ typedef struct
 } State;
 
 // Global variable to track if the Huffman tree is initialized
-static int huffman_tree_dict_initialized = 0;
+int huffman_tree_dict_initialized = 0;
 
 // Global variable to hold the Huffman tree
 HuffmanTree huffman_tree_dict; // Assume this is a defined structure for your Huffman tree
@@ -133,7 +133,7 @@ void read_code(HuffmanTree *huffman_tree, State *state_data, uint16_t *ioCode)
 {
     if (huffman_tree->compressed_codes[0] == 0)
     {
-        fprintf(stderr, "Trying to read code from an empty HuffmanTree.\n");
+        fprintf(stderr, "\nTrying to read code from an empty HuffmanTree. : \n");
         exit(EXIT_FAILURE);
     }
 
@@ -496,6 +496,12 @@ extern uint8_t *inflate_buffer(uint32_t input_buffer_size, const uint8_t *input_
     {
         initialize_huffman_tree_dict();
         huffman_tree_dict_initialized = 1;
+    }
+
+    if (huffman_tree_dict.compressed_codes[0] == 0)
+    {
+        fprintf(stderr, "Huffman Tree Empty.\n");
+        exit(EXIT_FAILURE);
     }
 
     // Convert uint8_t buffer to uint32_t buffer

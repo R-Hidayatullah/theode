@@ -204,7 +204,7 @@ impl DatFile {
             ArchiveId::FileId => {
                 for i in 0..mft_index_entry.len() {
                     if mft_index_entry.get(i).unwrap().file_id == number {
-                        println!("Found : \n{:?}\n", mft_index_entry.get(i));
+                        // println!("Found : \n{:?}\n", mft_index_entry.get(i));
                         num_index = mft_index_entry.get(i).unwrap().base_id as usize;
                     }
                 }
@@ -212,7 +212,7 @@ impl DatFile {
             ArchiveId::BaseId => {
                 for i in 0..mft_index_entry.len() {
                     if mft_index_entry.get(i).unwrap().base_id == number {
-                        println!("Found : \n{:?}\n", mft_index_entry.get(i));
+                        // println!("Found : \n{:?}\n", mft_index_entry.get(i));
 
                         num_index = mft_index_entry.get(i).unwrap().base_id as usize;
                     }
@@ -222,11 +222,11 @@ impl DatFile {
 
         num_index = num_index - 1;
 
-        println!(
-            "Valid number {} : {:?}",
-            num_index + 1,
-            &self.mft_data.get(num_index)
-        );
+        // println!(
+        //     "Valid number {} : {:?}",
+        //     num_index + 1,
+        //     &self.mft_data.get(num_index)
+        // );
 
         // Open the file and create a buffered reader.
         let file = File::open(file_path)?;
@@ -237,10 +237,10 @@ impl DatFile {
         // Call mft_read_data to read the compressed data
         let data = Self::mft_read_data(&mut buf_reader, mft_table.offset, mft_table.size);
 
-        DatFile::print_first_16_bytes(&data);
+        // DatFile::print_first_16_bytes(&data);
 
-        if mft_table.compression_flag != 0 {
-            println!("Compressed!");
+        if mft_table.compression_flag == 8 {
+            // println!("Compressed!");
             let input_buffer_size: u32 = data.len() as u32;
             let mut output_buffer_size: u32 = data.len() as u32;
             let custom_output_buffer_size: u32 = 0;
@@ -267,10 +267,10 @@ impl DatFile {
             // Convert the result pointer to a slice
             let output_slice =
                 unsafe { std::slice::from_raw_parts(result_ptr, output_buffer_size as usize) };
-            DatFile::print_first_16_bytes(&output_slice);
+            // DatFile::print_first_16_bytes(&output_slice);
             Ok(output_slice.to_vec())
         } else {
-            DatFile::print_first_16_bytes(&data);
+            // DatFile::print_first_16_bytes(&data);
 
             Ok(data)
         }
